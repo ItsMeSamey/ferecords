@@ -1,0 +1,44 @@
+# FeRecords independent technical review
+
+2026-11-06. Technical recommendation: PASS for the documented strict native byte dialect and bounded writer contract. No unresolved correctness defect was found in the reviewed implementation. Root still owns entry eligibility/contact and final external actions. This review performed no registration, contact, publishing, submission, wallet operation or paid-resource action.
+
+## Findings resolved
+
+1. **Canonical output can exceed the original parser budget.** Merely qualifying the roundtrip wording would have left the strongest reader/writer promise unsupported at maximum sizes. The implementation now supplies `canonical_raw_size`, `write_record_bounded` and `write_selected_bounded`. These preflight the target parser's field count, decoded lengths and canonical raw size before output. The frozen parsing grammar and configuration caps were preserved. The implementation is in `ferecords/src/lib.fe:266`; the distinction is documented in `ferecords/CONTRACT.md:21`.
+
+   For F selected fields, the encoded raw size is E = (F - 1) + sum(2 + decoded_length + embedded_quote_count), excluding the final CRLF. A successful bounded write guarantees reparsing with the supplied compatible Limits, subject to successful source/sink operations. E must fit the declared raw limit, at most 1,048,576 bytes. The unrestricted writer and CLI select still serialize without promising compatibility with a particular parser budget. They do not truncate output.
+
+   Independent native tests verify exact 1 MiB raw output for plain and quote-heavy fields, full-byte recovery through a parser fed in irregular 4,093-byte chunks, near-cap duplicate projections, and rejection beyond the budget before any output or output-buffer allocation. They also check a 16,384-byte field with its derived 16,386-byte canonical budget and rejection at one byte less. Invalid configuration, field limit, field count and missing selection fail before output. All 11 checks passed on core SHA256 `fef132f1106a8a6ff53cb047d5bf5dcf7e50321e9b1071e4770483d9f330c5e7`. Receipt: `BOUNDED_WRITER_b93f28c00701e8e4.json`.
+
+2. **The first black-box runner confused CLI validation with the library error contract.** Six invalid limit configurations produce CLI usage status 64 before a Parser is built. The runner expected library Config2 transport. The original FAIL receipt with 30 mismatches is preserved, not overwritten or silently relabeled. A separate direct native harness independently verified Config2 for all six configurations. The other 8,025 black-box comparisons agreed. Details: `DIFFERENTIAL_CLASSIFICATION.md` and `CANDIDATE_DIFFERENTIAL_86f49de7ba700491.json`.
+
+3. **CLI error help was initially too sparse.** The final help explains strict CRLF input, zero-based/duplicate projection, defaults, caps, codes, diagnostic mode and host I/O limitations. The focused final CLI suite passed. Errors stay out of CSV stdout; inspection is a distinct diagnostic mode. A GUI is unnecessary for this stdin/stdout developer tool.
+
+## Independent correctness evidence
+
+The reference and hand expectations were frozen before candidate source review. `reference.py` uses whole-input field parsing and lookahead, independently of the Fe incremental state machine. It passed 56 hand-authored parser cases and six exact writer vectors. All 1,555 strings of length zero through four over the structural alphabet were enumerated. The 88 valid strings agreed with Python csv after one explicit normalization for a bare blank row; Python was not used to adjudicate malformed-input policy. Frozen corpus SHA256: `85da8df5c9a1fe48f61581991fa0753d7b5e00302a099864a41458fd6b7cb08a`. Receipt: `ORACLE_FREEZE.json`.
+
+The first immutable CLI snapshot ran 1,611 corpus cases at chunk sizes 1, 2, 3, 7 and 4,096. Its 1,605 valid-configuration cases matched decoded rows, complete-row prefix, first error kind/byte/record/field, success byte positions and metadata. Invalid configurations were resolved as described above.
+
+The independent native harness then ran every partition of the hand fixtures up to eight bytes and every single split of longer fixtures, with inserted empty chunks. All 56 cases and 377 schedules passed. This covered quote runs, multiline values, CRLF splits, empty/trailing fields, every specified EOF outcome, NUL/high bytes, syntax/limit precedence, exact limits, successful repeated finish, feed-after-finish, sticky first errors and retained completed-row prefixes. Receipt: `NATIVE_CONFORMANCE_d95126063a9eca63.json`; original parser core SHA256 `ef10fb8de622ed51e3003586d080ee405472553308fa51d3c059e3552f8b89fd`.
+
+The final CLI snapshot passed 611 focused executions, including 96 independently generated valid multirow inputs, exact duplicate/ordered projection bytes, inserted-NUL failures, default size/count boundaries, missing-column and malformed-later-row prefix behavior, numeric overflow/invalid arguments, help content and actual input-buffer capacity. Canonical output from an exact 65,536-byte raw input correctly fails under the original raw budget and reparses under 65,544 bytes. Receipt: `EXTENDED_CLI_6ac565170dce1e6e.json`. Binary SHA256: `6ac565170dce1e6ec528a1244d4aac0d29eab63d0f996121608e18d1d875721a`. The owner confirmed rebuilding after adding unused bounded APIs produced this same binary hash, so these CLI/storage receipts still identify the final executable.
+
+Owner-native tests were also source-reviewed: independent expected writer bytes, failure injection at every output byte, zero-field/missing/NUL rejection, fixed 256-field boundary, explicit teardown and injected counter overflow. Those support, rather than replace, the reviewer-owned evidence. No runtime speed superiority is claimed.
+
+## Bounded-storage review
+
+Reviewed `ferecords/tests/storage.py` and `ferecords/build/storage-report.json` without repeating the measurement. The driver streams input in batches of 64 records and consumes bounded diagnostic lines; each decoded row and total is checked. For 1,000 and 100,000 repetitions, measured retained record capacity is 32 bytes, fixed field-offset payload 2,048 bytes, and input capacity 4,096 bytes. Both runs exited zero with correct 14,000/1,400,000 input-byte totals.
+
+An independent audit recomputed both input and output SHA256 values from the stated corpus, checked its decoded bytes against the independent reference, and verified the measurement script hash. Report SHA256: `eeff265b3100508a50e9df06fc4499141e0b519a7a267fd329a20fa9cda53d1f`. The owner confirmed no CLI rebuild occurred between the two measurements.
+
+This supports constant retained payload storage for the fixed-record stream together with source inspection showing one reused record buffer. ByteBuffer capacity never shrinks on clear, so final capacity is also its peak retained capacity during these streams. General maximum bounds must additionally include power-of-two rounding, simultaneous old/new allocations while growing, fixed parser/CLI arrays, scalar state, host buffers and allocator overhead. The README distinguishes these. Sampled RSS and wall times remain descriptive; there is no fabricated optimized-library baseline or throughput claim.
+
+## Practical limits and remaining entry work
+
+- The parser deliberately rejects LF-only records and NUL, and is a native-only byte implementation using std::native::ByteBuffer. It is not a universal CSV parser or an EVM implementation. Header rows have no special treatment.
+- Actual host allocator exhaustion was not induced. Native allocation-failure paths were source-reviewed; mock sink tests do not prove host OOM handling. The stock HostIo adapter conflates read failure/EOF and exposes no buffered flush result. These restrictions are disclosed.
+- Synchronous record callbacks borrow storage that is reused after return. Every owner requires explicit release. Source and tests show the relevant success/failure paths; this is not a general formal proof of the compiler/runtime.
+- The compiler is the retained, checksum-pinned Fe 26.5.0 native release. No compiler-Rust changes, packages, network runtime or new resources were needed. The proper ingot and standalone source assembly preserve all substantive data handling in Fe; the Python scripts only build or test it.
+- The verified benefit is reusable incremental record parsing/writing, precise failures, ordered duplicate projection and bounded retention over inspected standard primitives that contain no CSV API. It is not proof of first-ever novelty, best-in-class performance or predicted prize placement.
+- Technical contest eligibility is confirmed in `CONTRACT_REVIEW.md`; responsible human/contact and conflict facts stay with root. The official registration/submission/repository requirements still apply. No approval request or external action is introduced by this report.

@@ -1,0 +1,27 @@
+{
+  "scope": "independent frozen hand cases, all short partitions, long single splits, empty chunks, terminal behavior",
+  "core_source": "package/src/lib.fe",
+  "core_sha256": "8713bca3eedb4925f7689abdd177552049e83d753c34010bee03c9b8c5fc719a",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0",
+  "generated_source_sha256": "02547bac55e9e933f3399aa95acb65538d994fcb67b2d6ec07357cef143e4d1d",
+  "hand_fixture_sha256": "e2abebaf7a79a1567226e73aaacd738d107c10feab0c0158178709cac9908b5f",
+  "hand_cases": 56,
+  "partition_schedules": 377,
+  "command": [
+    "external/fe-v26.5.0-linux-amd64",
+    "test",
+    "package/build/validation-runs/1793955049295038342/native-frozen-02547bac55e9e933.fe",
+    "--backend",
+    "native",
+    "--jobs",
+    "1",
+    "--native-timeout-secs",
+    "20",
+    "--native-output-limit-kib",
+    "64"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 4.889199077966623,
+  "result": "PASS",
+  "log": "package/build/validation-runs/1793955049295038342/native-02547bac55e9e933.log"
+}

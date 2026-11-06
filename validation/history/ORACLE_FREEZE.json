@@ -1,0 +1,15 @@
+{
+  "scope": "independent oracle self-check only; no Fe candidate execution",
+  "hand_cases": 56,
+  "writer_cases": 6,
+  "structural_cases": 1555,
+  "valid_structural_python_csv_agreements": 88,
+  "corpus_cases": 1611,
+  "result": "PASS",
+  "sha256": {
+    "reference.py": "bb7e18830cf432bb494ad2381c5d1c5ee21924ce6a874a5c4d3c0ee5b4428766",
+    "hand_fixtures.py": "e2abebaf7a79a1567226e73aaacd738d107c10feab0c0158178709cac9908b5f",
+    "selfcheck.py": "8416a661bb915bc12f59d8a21ad1046e396d06447f219e85dac3c37ea75e5e47",
+    "frozen_corpus.json": "85da8df5c9a1fe48f61581991fa0753d7b5e00302a099864a41458fd6b7cb08a"
+  }
+}

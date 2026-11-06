@@ -1,0 +1,20 @@
+{
+  "scope": "independent native parser/corpus fixed-chunk differential",
+  "binary_source": "package/build/bin/ferecords",
+  "binary_snapshot": "package/build/validation-runs/1793955049295038342/candidate-27146ff3e1ca3a3e",
+  "binary_sha256": "27146ff3e1ca3a3e6da4d6d7d5b4e19f7ea3132a9e608f8bfad711e0d41e4212",
+  "corpus_sha256": "85da8df5c9a1fe48f61581991fa0753d7b5e00302a099864a41458fd6b7cb08a",
+  "cases": 1611,
+  "executions": 8055,
+  "configuration_cases_are_cli_usage_checks": true,
+  "chunks": [
+    1,
+    2,
+    3,
+    7,
+    4096
+  ],
+  "elapsed_seconds": 6.915159230004065,
+  "result": "PASS",
+  "failures": []
+}

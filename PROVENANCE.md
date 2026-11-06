@@ -1,0 +1,15 @@
+# Provenance and assistance
+
+Substantive FeRecords source implementation began on 2026-11-06, within the November 3 through November 24 build window. The November 1 design notes, research/API reviews and generic preparation smoke predate the window. They covered design and feasibility; CSV implementation began on November 6. Original preparation files and failed experimental receipts remain in the development archive.
+
+The retained Fe compiler is the official v26.5.0 x86_64 Linux asset, commit 3dab95f8eebdccf9a2382bb59a33f7bbd03540ca, 54,195,184 bytes, SHA256 `3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0`. Build tooling verifies that exact hash before execution. Core and std are bundled with this compiler. No additional Fe dependency, package installation, compiler modification or runtime network service is used.
+
+Original FeRecords parser, writer, CLI, tests and supporting scripts are licensed under Apache-2.0. The unmodified LICENSE was copied from the retained official challenge starter, SHA256 `62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a`. The starter manifest shape is reused. No vault, contract or other starter implementation is copied.
+
+The implementation uses official Fe APIs rather than copying their allocator or I/O implementation. Retained reference sources are the release's ByteBuffer (`c7714935ff8ddb90f4ce4e537939c31d1f0c875d539368668159e039b90eb90e`), I/O (`e33260bc2ccf83fcc8e4b108a8cdc836a9ca97eeef3e05c0c721e08a6254454e`) and Args (`86c29301ed75b9f51301238db5e4346408f8d3887921da5b1a4b428645367e46`). CSV quoting and records are established format conventions, informed by RFC 4180. This dialect deliberately differs from RFC byte restrictions and rejects LF-only row endings.
+
+The pre-window generic Fe smoke hash is `2cd8d9524fa1653ddd1d78d0b891ae4b8b27ff9710d22710fff30322aa103f2b`. It established native build and small buffer/effect feasibility only. Baseline B0 is that smoke plus pinned standard APIs, which provide no CSV record parser in the inspected material. FeRecords adds tested record parsing, writing and projection.
+
+AI agents performed research, contract design, implementation, documentation and testing. A separate agent froze an independently written whole-input reference, hand expectations and a generated corpus before seeing candidate results, then reviewed the implementation and CLI. The review receipts record that agent's work. The [contest rules](https://fe-lang.org/contest/) require disclosure of AI assistance, testing, the ability to explain the code and one responsible human contact. Contact details and conflict eligibility remain entry responsibilities.
+
+Build and test receipts include exact generated-source hashes, command lines and timestamps. The public `validation/` package contains the independent corpus freeze and retains the initial differential mismatch receipt with its explanation. Original receipts may contain development-machine paths; the included runners resolve paths within the extracted package and accept an external compiler.

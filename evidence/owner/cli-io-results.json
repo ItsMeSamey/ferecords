@@ -1,0 +1,99 @@
+{
+  "explicit_cases": 44,
+  "chunk_comparisons": 35,
+  "native_io_cases": 15,
+  "native_io_results": [
+    {
+      "name": "directory stdin validate",
+      "expected_code": 20,
+      "actual_code": 20,
+      "passed": true
+    },
+    {
+      "name": "directory stdin select",
+      "expected_code": 20,
+      "actual_code": 20,
+      "passed": true
+    },
+    {
+      "name": "directory stdin inspect",
+      "expected_code": 20,
+      "actual_code": 20,
+      "passed": true
+    },
+    {
+      "name": "delayed output failure",
+      "expected_code": 16,
+      "actual_code": 16,
+      "passed": true
+    },
+    {
+      "name": "help flush failure",
+      "expected_code": 16,
+      "actual_code": 16,
+      "passed": true
+    },
+    {
+      "name": "inspect flush failure",
+      "expected_code": 16,
+      "actual_code": 16,
+      "passed": true
+    },
+    {
+      "name": "earlier syntax error survives flush failure",
+      "expected_code": 10,
+      "actual_code": 10,
+      "passed": true
+    },
+    {
+      "name": "earlier missing column survives flush failure",
+      "expected_code": 18,
+      "actual_code": 18,
+      "passed": true
+    },
+    {
+      "name": "large output reports fputc failure",
+      "expected_code": 16,
+      "actual_code": 16,
+      "passed": true
+    },
+    {
+      "name": "read-only stdout validate",
+      "expected_code": 0,
+      "actual_code": 0,
+      "passed": true
+    },
+    {
+      "name": "read-only stdout select",
+      "expected_code": 16,
+      "actual_code": 16,
+      "passed": true
+    },
+    {
+      "name": "write-only stdin",
+      "expected_code": 20,
+      "actual_code": 20,
+      "passed": true
+    },
+    {
+      "name": "closed stdout validate",
+      "expected_code": 0,
+      "actual_code": 0,
+      "passed": true
+    },
+    {
+      "name": "closed stdout select",
+      "expected_code": 16,
+      "actual_code": 16,
+      "passed": true
+    },
+    {
+      "name": "closed stdin",
+      "expected_code": 20,
+      "actual_code": 20,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "failures": []
+}

@@ -1,0 +1,53 @@
+{
+  "probe_source_sha256": "e1d5984c58b7e5431142e8a5c5adae8a8f10f7a1477dfaf05966692c101a7776",
+  "probe_binary_sha256": "ea676ff2f2f9ed64b39806f7b8e924c139e77502648ca4f89259808fee89a0f0",
+  "old_cli_sha256": "6ac565170dce1e6ec528a1244d4aac0d29eab63d0f996121608e18d1d875721a",
+  "checks": [
+    {
+      "name": "empty",
+      "exit": 0,
+      "stdout_hex": "",
+      "expected_hex": "",
+      "pass": true
+    },
+    {
+      "name": "bytes",
+      "exit": 0,
+      "stdout_hex": "610d0aff",
+      "expected_hex": "610d0aff",
+      "pass": true
+    },
+    {
+      "name": "old-read-error",
+      "exit": 0,
+      "expected_exit": 0,
+      "stdout_hex": "",
+      "stderr_hex": "",
+      "pass": true
+    },
+    {
+      "name": "probe-read-error",
+      "exit": 20,
+      "expected_exit": 20,
+      "stdout_hex": "",
+      "stderr_hex": "",
+      "pass": true
+    },
+    {
+      "name": "old-delayed-output-error",
+      "exit": 0,
+      "expected_exit": 0,
+      "stderr_hex": "",
+      "pass": true
+    },
+    {
+      "name": "probe-delayed-output-error",
+      "exit": 16,
+      "expected_exit": 16,
+      "stderr_hex": "",
+      "pass": true
+    }
+  ],
+  "result": "PASS",
+  "scope": "ordinary stdin directory read error and /dev/full deferred-output failure; original false-success preserved"
+}

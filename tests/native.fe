@@ -1,0 +1,456 @@
+// SPDX-License-Identifier: Apache-2.0
+// Native contract tests. Expected fields and writer bytes are hand authored.
+fn test_ok(_ result: Result<Failure, ()>) {
+    match result { Result::Ok(()) => {}, Result::Err(_) => core::panic() }
+}
+fn test_error(_ result: Result<Failure, ()>, _ code: u8, _ offset: u64, _ row: u64, _ field: u64) {
+    match result {
+        Result::Err(e) => {
+            core::assert(e.kind.code() == code)
+            core::assert(e.offset == offset && e.row == row && e.field == field)
+        },
+        _ => core::panic(),
+    }
+}
+fn test_bytes<const N: usize>(_ values: [u8; N]) -> ByteBuffer {
+    var bytes = ByteBuffer::new()
+    core::assert(bytes.try_resize(N.downcast_unchecked()))
+    var i: usize = 0
+    while i < N { bytes.set_byte(index: i.downcast_unchecked(), value: values[i])
+        i += 1 }
+    bytes
+}
+struct TestRows { mode: u8 }
+impl RecordSink for TestRows {
+    fn accept(mut self, _ record: Record, _ offset: u64, _ row: u64) -> Result<Failure, ()> {
+        let _ = offset
+        if self.mode == 0 { core::panic() }
+        if self.mode == 1 {
+            core::assert(row == 0 && record.field_count() == 3)
+            core::assert(record.field_len(0) == 1 && record.byte_at(0, 0) == 97)
+            core::assert(record.field_len(1) == 5)
+            core::assert(record.byte_at(1, 0) == 98 && record.byte_at(1, 1) == 44)
+            core::assert(record.byte_at(1, 2) == 34 && record.byte_at(1, 3) == 13 && record.byte_at(1, 4) == 10)
+            core::assert(record.field_len(2) == 0)
+        }
+        if self.mode == 2 {
+            core::assert(row == 0 && record.field_count() == 1)
+            core::assert(record.field_len(0) == 1 && record.byte_at(0, 0) == 97)
+        }
+        if self.mode == 3 {
+            core::assert(row == 0 && record.field_count() == 2)
+            core::assert(record.field_len(0) == 0 && record.field_len(1) == 0)
+        }
+        if self.mode == 4 {
+            core::assert(row == 0 && record.field_count() == 1 && record.field_len(0) == 0)
+        }
+        if self.mode == 5 {
+            core::assert(row == 0 && record.field_count() == 1 && record.field_len(0) == 3)
+            core::assert(record.byte_at(0, 0) == 128 && record.byte_at(0, 1) == 255 && record.byte_at(0, 2) == 1)
+        }
+        if self.mode == 6 {
+            core::assert(row == 0 && record.field_count() == 2)
+            core::assert(record.field_len(0) == 1 && record.byte_at(0, 0) == 97 && record.field_len(1) == 0)
+        }
+        if self.mode == 7 {
+            core::assert(record.field_count() == 1 && record.field_len(0) == 1)
+            core::assert(record.byte_at(0, 0) == 97 + row.downcast_unchecked())
+        }
+        if self.mode == 8 {
+            return Result::Err(Failure { kind: Kind::Output, offset, row, field: 0 })
+        }
+        if self.mode == 9 {
+            core::assert(row == 0 && record.field_count() == 2)
+            core::assert(record.field_len(0) == 5 && record.field_len(1) == 0)
+            core::assert(record.byte_at(0, 0) == 97 && record.byte_at(0, 1) == 34)
+            core::assert(record.byte_at(0, 2) == 13 && record.byte_at(0, 3) == 10 && record.byte_at(0, 4) == 255)
+        }
+        if self.mode == 10 {
+            core::assert(row == 0 && record.field_count() == 256)
+            var field: u64 = 0
+            while field < 256 { core::assert(record.field_len(field) == 0)
+                field += 1 }
+        }
+        Result::Ok(())
+    }
+}
+fn test_splits<const N: usize>(_ values: [u8; N], _ mode: u8, _ rows: u64) {
+    let bytes = test_bytes(values)
+    let total: u64 = N.downcast_unchecked()
+    var split: u64 = 0
+    while split <= total {
+        var parser = Parser::new(default_limits())
+        with (RecordSink = TestRows { mode }) {
+            test_ok(parser.feed(bytes, 0, 0))
+            test_ok(parser.feed(bytes, 0, split))
+            test_ok(parser.feed(bytes, split, total - split))
+            test_ok(parser.feed(bytes, total, 0))
+            test_ok(parser.finish())
+            test_ok(parser.finish())
+            core::assert(parser.records_seen() == rows && parser.position() == total)
+        }
+        parser.release()
+        split += 1
+    }
+    bytes.release()
+}
+fn test_bad_splits<const N: usize>(_ values: [u8; N], _ limits: Limits, _ code: u8, _ offset: u64, _ field: u64) {
+    let bytes = test_bytes(values)
+    let total: u64 = N.downcast_unchecked()
+    var split: u64 = 0
+    while split <= total {
+        var parser = Parser::new(limits)
+        with (RecordSink = TestRows { mode: 0 }) {
+            let _ = parser.feed(bytes, 0, split)
+            let _ = parser.feed(bytes, split, total - split)
+            test_error(parser.finish(), code, offset, 0, field)
+            test_error(parser.feed(bytes, 0, 0), code, offset, 0, field)
+            test_error(parser.finish(), code, offset, 0, field)
+            core::assert(parser.records_seen() == 0)
+        }
+        parser.release()
+        split += 1
+    }
+    bytes.release()
+}
+#[test]
+fn splits_preserve_complete_records_and_bytes() {
+    test_splits([97, 44, 34, 98, 44, 34, 34, 13, 10, 34, 44, 13, 10], 1, 1)
+    test_splits([97], 2, 1)
+    test_splits([44], 3, 1)
+    test_splits([34, 34], 4, 1)
+    test_splits([13, 10], 4, 1)
+    test_splits([128, 255, 1], 5, 1)
+    test_splits([97, 13, 10, 98, 13, 10], 7, 2)
+    let bytes = ByteBuffer::new()
+    var parser = Parser::new(default_limits())
+    with (RecordSink = TestRows { mode: 0 }) {
+        test_ok(parser.feed(bytes, 0, 0))
+        test_ok(parser.finish())
+        core::assert(parser.records_seen() == 0)
+    }
+    parser.release()
+    bytes.release()
+}
+#[test]
+fn all_partitions_of_short_quoted_record() {
+    let bytes = test_bytes([97, 44, 34, 34, 13, 10])
+    var mask: u64 = 0
+    while mask < 32 {
+        var parser = Parser::new(default_limits())
+        with (RecordSink = TestRows { mode: 6 }) {
+            var start: u64 = 0
+            var i: u64 = 1
+            var bit: u64 = 1
+            while i < 6 {
+                if mask & bit != 0 {
+                    test_ok(parser.feed(bytes, start, i - start))
+                    test_ok(parser.feed(bytes, i, 0))
+                    start = i
+                }
+                bit *= 2
+                i += 1
+            }
+            test_ok(parser.feed(bytes, start, 6 - start))
+            test_ok(parser.finish())
+            core::assert(parser.records_seen() == 1)
+        }
+        parser.release()
+        mask += 1
+    }
+    bytes.release()
+}
+#[test]
+fn syntax_errors_and_positions_survive_every_split() {
+    let limits = default_limits()
+    test_bad_splits([0], limits, 5, 0, 0)
+    test_bad_splits([97, 13, 98], limits, 6, 2, 0)
+    test_bad_splits([97, 13], limits, 6, 2, 0)
+    test_bad_splits([97, 10], limits, 7, 1, 0)
+    test_bad_splits([97, 34], limits, 8, 1, 0)
+    test_bad_splits([34, 34, 97], limits, 9, 2, 0)
+    test_bad_splits([34], limits, 10, 1, 0)
+    test_bad_splits([44, 34], limits, 10, 2, 1)
+    test_bad_splits([34, 34, 34], limits, 10, 3, 0)
+}
+#[test]
+fn limits_are_exact_and_syntax_precedes_limits() {
+    let one = Limits { field_bytes: 1, raw_bytes: 1, fields: 1 }
+    let bytes = test_bytes([97, 13, 10])
+    var parser = Parser::new(one)
+    with (RecordSink = TestRows { mode: 2 }) {
+        test_ok(parser.feed(bytes, 0, 3))
+        test_ok(parser.finish())
+        core::assert(parser.records_seen() == 1)
+    }
+    parser.release()
+    bytes.release()
+    test_bad_splits([97, 98], one, 12, 1, 0)
+    test_bad_splits([97, 98], Limits { field_bytes: 1, raw_bytes: 2, fields: 1 }, 11, 1, 0)
+    test_bad_splits([97, 44], Limits { field_bytes: 1, raw_bytes: 2, fields: 1 }, 13, 1, 1)
+    test_bad_splits([97, 34], one, 8, 1, 0)
+    test_bad_splits([97, 10], one, 7, 1, 0)
+    test_bad_splits([97, 13, 98], one, 6, 2, 0)
+    test_bad_splits([34, 34, 97], Limits { field_bytes: 1, raw_bytes: 2, fields: 1 }, 9, 2, 0)
+}
+#[test]
+fn checked_range_configuration_and_terminal_calls() {
+    let bytes = test_bytes([97])
+    var bad_config = Parser::new(Limits { field_bytes: 1, raw_bytes: 1, fields: 0 })
+    var bad_range = Parser::new(default_limits())
+    var finished = Parser::new(default_limits())
+    with (RecordSink = TestRows { mode: 0 }) {
+        test_error(bad_config.feed(bytes, 0, 1), 2, 0, 0, 0)
+        test_error(bad_config.finish(), 2, 0, 0, 0)
+        test_error(bad_range.feed(bytes, 1, 1), 3, 0, 0, 0)
+        test_error(bad_range.feed(bytes, 0, 1), 3, 0, 0, 0)
+        test_ok(finished.finish())
+        test_ok(finished.finish())
+        test_error(finished.feed(bytes, 0, 0), 4, 0, 0, 0)
+        test_error(finished.finish(), 4, 0, 0, 0)
+    }
+    bad_config.release()
+    bad_range.release()
+    finished.release()
+    bytes.release()
+}
+struct CountingReject { calls: u64 }
+impl RecordSink for CountingReject {
+    fn accept(mut self, _ record: Record, _ offset: u64, _ row: u64) -> Result<Failure, ()> {
+        let _ = record
+        self.calls += 1
+        Result::Err(Failure { kind: Kind::Output, offset, row, field: 0 })
+    }
+}
+#[test]
+fn consumer_failure_is_sticky() {
+    let bytes = test_bytes([97, 13, 10])
+    var parser = Parser::new(default_limits())
+    var rejecting = CountingReject { calls: 0 }
+    with (RecordSink = rejecting) {
+        test_error(parser.feed(bytes, 0, 3), 16, 2, 0, 0)
+        test_error(parser.finish(), 16, 2, 0, 0)
+        test_error(parser.feed(bytes, 0, 3), 16, 2, 0, 0)
+        core::assert(parser.records_seen() == 0)
+    }
+    core::assert(rejecting.calls == 1)
+    parser.release()
+    bytes.release()
+}
+
+struct TestOutput { bytes: [u8; 64], length: u64, at: u64, fail_at: u64 }
+impl ByteSink for TestOutput {
+    fn put(mut self, _ byte: u8) -> Result<Kind, ()> {
+        if self.at == self.fail_at { return Result::Err(Kind::Output) }
+        core::assert(self.at < self.length)
+        core::assert(byte == self.bytes[self.at as usize])
+        self.at += 1
+        Result::Ok(())
+    }
+}
+fn writer_record() -> Record {
+    let input = test_bytes([97, 34, 13, 10, 255])
+    var record = Record::new()
+    match record.push_field(input, 0, 5) { Result::Ok(()) => {}, _ => core::panic() }
+    match record.push_field(input, 5, 0) { Result::Ok(()) => {}, _ => core::panic() }
+    input.release()
+    record
+}
+#[test]
+fn writer_has_independent_canonical_bytes_and_propagates_failure() {
+    let record = writer_record()
+    var expected: [u8; 64] = [0; 64]
+    let exact: [u8; 13] = [34, 97, 34, 34, 13, 10, 255, 34, 44, 34, 34, 13, 10]
+    var i: usize = 0
+    while i < 13 { expected[i] = exact[i]
+        i += 1 }
+    var sink = TestOutput { bytes: expected, length: 13, at: 0, fail_at: 100 }
+    with (ByteSink = sink) { test_ok(write_record(record, 88, 7)) }
+    core::assert(sink.at == 13)
+    var fail_at: u64 = 0
+    while fail_at < 13 {
+        var failed = TestOutput { bytes: expected, length: 13, at: 0, fail_at }
+        with (ByteSink = failed) {
+            match write_record(record, 88, 7) {
+                Result::Err(e) => { core::assert(e.kind.code() == 16 && e.offset == 88 && e.row == 7) },
+                _ => core::panic(),
+            }
+        }
+        core::assert(failed.at == fail_at)
+        fail_at += 1
+    }
+    record.release()
+}
+#[test]
+fn writer_rejects_empty_and_missing_before_output() {
+    let empty = Record::new()
+    let record = writer_record()
+    var columns: [u64; 256] = [0; 256]
+    columns[1] = 2
+    var sink = TestOutput { bytes: [0; 64], length: 0, at: 0, fail_at: 100 }
+    with (ByteSink = sink) {
+        test_error(write_record(empty, 8, 3), 19, 8, 3, 0)
+        test_error(write_selected(record, columns, 2, 8, 3), 18, 8, 3, 2)
+    }
+    core::assert(sink.at == 0)
+    empty.release()
+    record.release()
+}
+#[test]
+fn record_builder_rejects_nul_and_range_without_mutating() {
+    let input = test_bytes([97, 0])
+    var record = Record::new()
+    match record.push_field(input, 0, 2) { Result::Err(Kind::Nul) => {}, _ => core::panic() }
+    core::assert(record.field_count() == 0)
+    match record.push_field(input, 2, 1) { Result::Err(Kind::Range) => {}, _ => core::panic() }
+    core::assert(record.field_count() == 0)
+    match record.push_field(input, 0, 1) { Result::Ok(()) => {}, _ => core::panic() }
+    core::assert(record.field_count() == 1 && record.byte_at(0, 0) == 97)
+    record.release()
+    input.release()
+}
+
+struct TestCollector { bytes: ByteBuffer }
+impl ByteSink for TestCollector {
+    fn put(mut self, _ byte: u8) -> Result<Kind, ()> {
+        let size = self.bytes.len()
+        if !self.bytes.try_resize(size + 1) { return Result::Err(Kind::Allocation) }
+        self.bytes.set_byte(index: size, value: byte)
+        Result::Ok(())
+    }
+}
+#[test]
+fn writer_roundtrip_and_ordered_duplicate_projection() {
+    let record = writer_record()
+    var collected = TestCollector { bytes: ByteBuffer::new() }
+    with (ByteSink = collected) { test_ok(write_record(record, 0, 0)) }
+    var parser = Parser::new(default_limits())
+    with (RecordSink = TestRows { mode: 9 }) {
+        var i: u64 = 0
+        while i < collected.bytes.len() {
+            test_ok(parser.feed(collected.bytes, i, 1))
+            i += 1
+        }
+        test_ok(parser.finish())
+        core::assert(parser.records_seen() == 1)
+    }
+    parser.release()
+    collected.bytes.release()
+    var columns: [u64; 256] = [0; 256]
+    columns[0] = 1
+    columns[1] = 0
+    columns[2] = 1
+    var expected: [u8; 64] = [0; 64]
+    let exact: [u8; 16] = [34, 34, 44, 34, 97, 34, 34, 13, 10, 255, 34, 44, 34, 34, 13, 10]
+    var i: usize = 0
+    while i < 16 { expected[i] = exact[i]
+        i += 1 }
+    var output = TestOutput { bytes: expected, length: 16, at: 0, fail_at: 100 }
+    with (ByteSink = output) { test_ok(write_selected(record, columns, 3, 0, 0)) }
+    core::assert(output.at == 16)
+    record.release()
+}
+
+#[test]
+fn fixed_field_metadata_boundary_and_builder_atomicity() {
+    var commas = ByteBuffer::new()
+    core::assert(commas.try_resize(256))
+    var i: u64 = 0
+    while i < 256 { commas.set_byte(index: i, value: 44)
+        i += 1 }
+    var parser = Parser::new(default_limits())
+    var too_many = Parser::new(default_limits())
+    with (RecordSink = TestRows { mode: 10 }) {
+        test_ok(parser.feed(commas, 0, 255))
+        test_ok(parser.finish())
+        test_error(too_many.feed(commas, 0, 256), 13, 255, 0, 256)
+    }
+    parser.release()
+    too_many.release()
+    var record = Record::new()
+    i = 0
+    while i < 256 {
+        match record.push_field(commas, 0, 0) { Result::Ok(()) => {}, _ => core::panic() }
+        i += 1
+    }
+    match record.push_field(commas, 0, 0) { Result::Err(Kind::FieldCount) => {}, _ => core::panic() }
+    core::assert(record.field_count() == 256)
+    record.release()
+    commas.release()
+}
+#[test]
+fn counter_overflow_guards_with_injected_boundary_state() {
+    // White-box counter injection checks guards without an enormous input stream.
+    let bytes = test_bytes([97, 13, 10])
+    var position = Parser::new(default_limits())
+    var rows = Parser::new(default_limits())
+    position.pos = 0xffffffffffffffff
+    rows.rows = 0xffffffffffffffff
+    with (RecordSink = TestRows { mode: 0 }) {
+        test_error(position.feed(bytes, 0, 1), 14, 0xffffffffffffffff, 0, 0)
+        test_error(position.finish(), 14, 0xffffffffffffffff, 0, 0)
+        test_error(rows.feed(bytes, 0, 3), 14, 2, 0xffffffffffffffff, 0)
+        test_error(rows.finish(), 14, 2, 0xffffffffffffffff, 0)
+    }
+    position.release()
+    rows.release()
+    bytes.release()
+}
+
+#[test]
+fn bounded_writer_counts_quote_expansion_and_preflights_every_limit() {
+    let input = test_bytes([34, 97])
+    var record = Record::new()
+    var long_field = Record::new()
+    match record.push_field(input, 0, 1) { Result::Ok(()) => {}, _ => core::panic() }
+    match long_field.push_field(input, 0, 2) { Result::Ok(()) => {}, _ => core::panic() }
+    let columns: [u64; 256] = [0; 256]
+
+    // Each decoded quote requires four canonical bytes. Two copies plus comma
+    // cost nine raw bytes; the terminal CRLF is deliberately excluded.
+    match canonical_raw_size(record, columns, 2, 77, 4) {
+        Result::Ok(size) => core::assert(size == 9),
+        _ => core::panic(),
+    }
+    var expected: [u8; 64] = [0; 64]
+    let exact: [u8; 11] = [34, 34, 34, 34, 44, 34, 34, 34, 34, 13, 10]
+    var i: usize = 0
+    while i < 11 { expected[i] = exact[i]
+        i += 1 }
+    var accepted = TestOutput { bytes: expected, length: 11, at: 0, fail_at: 100 }
+    with (ByteSink = accepted) {
+        test_ok(write_selected_bounded(record, columns, 2,
+            Limits { field_bytes: 1, raw_bytes: 9, fields: 2 }, 77, 4))
+    }
+    core::assert(accepted.at == 11)
+
+    var rejected = TestOutput { bytes: [0; 64], length: 0, at: 0, fail_at: 100 }
+    with (ByteSink = rejected) {
+        test_error(write_selected_bounded(record, columns, 2,
+            Limits { field_bytes: 1, raw_bytes: 8, fields: 2 }, 77, 4), 12, 77, 4, 0)
+        test_error(write_selected_bounded(long_field, columns, 1,
+            Limits { field_bytes: 1, raw_bytes: 9, fields: 2 }, 77, 4), 11, 77, 4, 0)
+        test_error(write_selected_bounded(record, columns, 3,
+            Limits { field_bytes: 1, raw_bytes: 20, fields: 2 }, 77, 4), 13, 77, 4, 3)
+        test_error(write_selected_bounded(record, columns, 1,
+            Limits { field_bytes: 1, raw_bytes: 0, fields: 1 }, 77, 4), 2, 77, 4, 0)
+    }
+    core::assert(rejected.at == 0)
+
+    let single: [u8; 6] = [34, 34, 34, 34, 13, 10]
+    i = 0
+    while i < 6 { expected[i] = single[i]
+        i += 1 }
+    var complete = TestOutput { bytes: expected, length: 6, at: 0, fail_at: 100 }
+    with (ByteSink = complete) {
+        test_ok(write_record_bounded(record, Limits { field_bytes: 1, raw_bytes: 4, fields: 1 }, 12, 6))
+    }
+    core::assert(complete.at == 6)
+    with (ByteSink = rejected) {
+        test_error(write_record_bounded(record, Limits { field_bytes: 1, raw_bytes: 3, fields: 1 }, 12, 6), 12, 12, 6, 0)
+    }
+    core::assert(rejected.at == 0)
+    record.release()
+    long_field.release()
+    input.release()
+}

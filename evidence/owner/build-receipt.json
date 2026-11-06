@@ -1,0 +1,18 @@
+{
+  "action": "build",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0",
+  "argv": [
+    "<external-fe-26.5.0>",
+    "build",
+    "./build/ferecords.fe",
+    "--standalone",
+    "--backend",
+    "native",
+    "--out-dir",
+    "./build/bin"
+  ],
+  "source_sha256": "c8fa8049f20b08165e6a113dd36102faeba2e076bc8c262dc6f041ca13fb8719",
+  "returncode": 0,
+  "wall_seconds": 4.609806131978985,
+  "utc": "2026-11-06T08:24:42Z"
+}

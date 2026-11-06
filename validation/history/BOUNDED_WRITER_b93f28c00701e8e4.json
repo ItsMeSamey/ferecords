@@ -1,0 +1,24 @@
+{
+  "scope": "independent canonical output preflight and reparsing at exact/over 1MiB budget",
+  "core_sha256": "fef132f1106a8a6ff53cb047d5bf5dcf7e50321e9b1071e4770483d9f330c5e7",
+  "checks_sha256": "a19f07d6f77277d102e1c8059abf8873ac84c1a41b300a4841ff3b8538fd6d83",
+  "generated_sha256": "b93f28c00701e8e48b1403a562a45b348407d234fcf4329a3672b241bb81b5f5",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0",
+  "command": [
+    "historical-workspace/fe-builders-2026-preparation/toolchain/fe-v26.5.0-linux-amd64",
+    "test",
+    "historical-workspace/fe-builders-2026/independent-review/bounded-frozen-b93f28c00701e8e4.fe",
+    "--backend",
+    "native",
+    "--jobs",
+    "1",
+    "--native-timeout-secs",
+    "20",
+    "--native-output-limit-kib",
+    "64"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 7.987466035003308,
+  "log": "historical-workspace/fe-builders-2026/independent-review/bounded-b93f28c00701e8e4.log",
+  "result": "PASS"
+}

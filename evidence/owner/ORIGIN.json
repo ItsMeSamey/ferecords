@@ -1,0 +1,50 @@
+{
+  "normalization": "Development-machine project paths replaced with . and compiler path with <external-fe-26.5.0>. Outcomes, counts, dates and source hashes are unchanged. Original receipts remain in the development archive.",
+  "files": [
+    {
+      "file": "test.log",
+      "original_sha256": "e1e3667972938c165f44b4252240dd7265ed60c2d54ee4858f9123321cccdb3d",
+      "published_sha256": "e1e3667972938c165f44b4252240dd7265ed60c2d54ee4858f9123321cccdb3d"
+    },
+    {
+      "file": "test-receipt.json",
+      "original_sha256": "706a3d4904e9447fd3edffeeadc54996fe70fd15709c6cfdd69bbaa1acc38879",
+      "published_sha256": "04e1d68bf44e9eb2fec183e2defb33bf29dc0ed315e99a31faff75b5dfd307ac"
+    },
+    {
+      "file": "build-receipt.json",
+      "original_sha256": "3a3d1d5aabc1a9862cdfda13e88675b9c2fac6ae2209bde20aae66e370d1f9a9",
+      "published_sha256": "b2cac4b7cd227beedd47ce9abd77536a781f29cf6fd8940896701042f6b1e52c"
+    },
+    {
+      "file": "storage-report.json",
+      "original_sha256": "eeff265b3100508a50e9df06fc4499141e0b519a7a267fd329a20fa9cda53d1f",
+      "published_sha256": "34ef489ca554522e1b4faad46424dc8752b0b2255796e32e4cf686c52122c648"
+    },
+    {
+      "file": "ingot-check-receipt.json",
+      "original_sha256": "30affc29cde8590e9723f06900b6af401027f306eeab5c08bb5b2c7937a49655",
+      "published_sha256": "f63ce095ac4eb935f4707abeee241f5e24999bff694406f18bae43ce72872b96"
+    },
+    {
+      "file": "cli-results.json",
+      "original_sha256": "f5a552a830df7a91f639596e4276496852a9912bbfe971a15203f85c3bbbef69",
+      "published_sha256": "f5a552a830df7a91f639596e4276496852a9912bbfe971a15203f85c3bbbef69"
+    },
+    {
+      "file": "cli-io-build-receipt.json",
+      "original_sha256": "0abd4cfe568512e621af1a3810a924b6568ce4265793a0c7e12b28b295fd89a4",
+      "published_sha256": "c226f206ec138921666a9fc443176a3f35166fe0398a6a761b53886ae6ec453e"
+    },
+    {
+      "file": "cli-io-storage-report.json",
+      "original_sha256": "35c89835da4799daec9422d131a7b5442c585e326263346dfa1bba5f75ad4ca8",
+      "published_sha256": "4a680ecc7c17bb00435081129d90ba7976c496057fd3358c0c7d29819fc17951"
+    },
+    {
+      "file": "cli-io-results.json",
+      "original_sha256": "a025babd1033b56ad448c3b1531ab3f742d95d733c99ab34e5ec74b011685879",
+      "published_sha256": "a025babd1033b56ad448c3b1531ab3f742d95d733c99ab34e5ec74b011685879"
+    }
+  ]
+}

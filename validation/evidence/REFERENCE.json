@@ -1,0 +1,8 @@
+{
+  "result": "PASS",
+  "hand_cases": 56,
+  "writer_cases": 6,
+  "corpus_cases": 1611,
+  "valid_python_csv_agreements": 88,
+  "corpus_sha256": "85da8df5c9a1fe48f61581991fa0753d7b5e00302a099864a41458fd6b7cb08a"
+}

@@ -1,0 +1,112 @@
+// Independent native consumer of the frozen hand expectations.
+struct IndependentRows {
+    data: [u8; 128], ends: [u64; 32], row_ends: [u64; 16],
+    at_field: u64, at_row: u64, expected_rows: u64,
+}
+impl RecordSink for IndependentRows {
+    fn accept(mut self, _ record: Record, _ offset: u64, _ row: u64) -> Result<Failure, ()> {
+        let _ = offset
+        core::assert(row == self.at_row && row < self.expected_rows)
+        let row_end = self.row_ends[row as usize]
+        core::assert(record.field_count() == row_end - self.at_field)
+        var field: u64 = 0
+        while self.at_field < row_end {
+            let start = if self.at_field == 0 { 0 } else { self.ends[(self.at_field - 1) as usize] }
+            let length = self.ends[self.at_field as usize] - start
+            core::assert(record.field_len(field) == length)
+            var byte: u64 = 0
+            while byte < length {
+                core::assert(record.byte_at(field, byte) == self.data[(start + byte) as usize])
+                byte += 1
+            }
+            self.at_field += 1
+            field += 1
+        }
+        self.at_row += 1
+        Result::Ok(())
+    }
+}
+fn independent_check(_ result: Result<Failure, ()>, _ code: u8, _ offset: u64, _ row: u64, _ field: u64) {
+    match result {
+        Result::Ok(()) => core::assert(code == 0),
+        Result::Err(error) => {
+            core::assert(error.kind.code() == code)
+            core::assert(error.offset == offset && error.row == row && error.field == field)
+        },
+    }
+}
+fn independent_fixture<const N: usize, const D: usize, const F: usize, const R: usize>(
+    _ input_bytes: [u8; N], _ decoded: [u8; D], _ ends: [u64; F], _ row_ends: [u64; R],
+    _ limits: Limits, _ code: u8, _ offset: u64, _ row: u64, _ field: u64,
+) {
+    var input = ByteBuffer::new()
+    core::assert(input.try_resize(N.downcast_unchecked()))
+    var i: usize = 0
+    while i < N { input.set_byte(index: i.downcast_unchecked(), value: input_bytes[i])
+        i += 1 }
+    var expected_data: [u8; 128] = [0; 128]
+    var expected_ends: [u64; 32] = [0; 32]
+    var expected_rows: [u64; 16] = [0; 16]
+    i = 0
+    while i < D { expected_data[i] = decoded[i]
+        i += 1 }
+    i = 0
+    while i < F { expected_ends[i] = ends[i]
+        i += 1 }
+    i = 0
+    while i < R { expected_rows[i] = row_ends[i]
+        i += 1 }
+    let size: u64 = N.downcast_unchecked()
+    var schedules: u64 = 1
+    if size > 0 && size <= 8 {
+        i = 1
+        while i < N { schedules *= 2
+            i += 1 }
+    } else if size > 8 { schedules = size + 1 }
+    var schedule: u64 = 0
+    while schedule < schedules {
+        var parser = Parser::new(limits)
+        var consumer = IndependentRows {
+            data: expected_data, ends: expected_ends, row_ends: expected_rows,
+            at_field: 0, at_row: 0, expected_rows: R.downcast_unchecked(),
+        }
+        with (RecordSink = consumer) {
+            let _ = parser.feed(input, 0, 0)
+            if size > 8 {
+                let _ = parser.feed(input, 0, schedule)
+                let _ = parser.feed(input, schedule, 0)
+                let _ = parser.feed(input, schedule, size - schedule)
+            } else {
+                var start: u64 = 0
+                var end: u64 = 1
+                var bit: u64 = 1
+                while end < size {
+                    if schedule & bit != 0 {
+                        let _ = parser.feed(input, start, end - start)
+                        let _ = parser.feed(input, end, 0)
+                        start = end
+                    }
+                    bit *= 2
+                    end += 1
+                }
+                let _ = parser.feed(input, start, size - start)
+            }
+            let _ = parser.feed(input, size, 0)
+            independent_check(parser.finish(), code, offset, row, field)
+            independent_check(parser.finish(), code, offset, row, field)
+            if code != 0 {
+                independent_check(parser.feed(input, 0xffffffffffffffff, 1), code, offset, row, field)
+                independent_check(parser.finish(), code, offset, row, field)
+            } else {
+                core::assert(parser.position() == size)
+                independent_check(parser.feed(input, size, 0), 4, size, R.downcast_unchecked(), 0)
+                independent_check(parser.finish(), 4, size, R.downcast_unchecked(), 0)
+            }
+        }
+        core::assert(consumer.at_row == R.downcast_unchecked())
+        core::assert(parser.records_seen() == R.downcast_unchecked())
+        parser.release()
+        schedule += 1
+    }
+    input.release()
+}

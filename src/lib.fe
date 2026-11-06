@@ -1,0 +1,319 @@
+// SPDX-License-Identifier: Apache-2.0
+// FeRecords, original implementation begun 2026-11-06.
+use core::Result
+use std::native::ByteBuffer
+
+pub enum Kind {
+    Config, Range, Finished, Nul, BareCr, BareLf, Quote, AfterQuote,
+    Unclosed, FieldLimit, RawLimit, FieldCount, Overflow, Allocation,
+    Output, Width, Missing, EmptyRecord, Input,
+}
+impl Kind {
+    pub fn code(self) -> u8 {
+        match self {
+            Kind::Config => 2, Kind::Range => 3, Kind::Finished => 4,
+            Kind::Nul => 5, Kind::BareCr => 6, Kind::BareLf => 7,
+            Kind::Quote => 8, Kind::AfterQuote => 9, Kind::Unclosed => 10,
+            Kind::FieldLimit => 11, Kind::RawLimit => 12, Kind::FieldCount => 13,
+            Kind::Overflow => 14, Kind::Allocation => 15, Kind::Output => 16,
+            Kind::Width => 17, Kind::Missing => 18, Kind::EmptyRecord => 19,
+            Kind::Input => 20,
+        }
+    }
+}
+pub struct Failure { pub kind: Kind, pub offset: u64, pub row: u64, pub field: u64 }
+pub struct Limits { pub field_bytes: u64, pub raw_bytes: u64, pub fields: u64 }
+impl core::Copy for Kind {}
+impl core::Copy for Failure {}
+impl core::Copy for Limits {}
+pub fn default_limits() -> Limits { Limits { field_bytes: 16384, raw_bytes: 65536, fields: 256 } }
+
+pub struct Record { bytes: ByteBuffer, ends: [u64; 256], count: u64 }
+impl Record {
+    pub fn field_count(self) -> u64 { self.count }
+    pub fn new() -> Self { Self { bytes: ByteBuffer::new(), ends: [0; 256], count: 0 } }
+    pub fn push_field(mut self, _ input: ByteBuffer, _ start: u64, _ length: u64) -> Result<Kind, ()> {
+        if start > input.len() || length > input.len() - start { return Result::Err(Kind::Range) }
+        if self.count >= 256 { return Result::Err(Kind::FieldCount) }
+        if length > 1048576 - self.bytes.len() { return Result::Err(Kind::RawLimit) }
+        var i: u64 = 0
+        while i < length {
+            if input.byte_at(start + i) == 0 { return Result::Err(Kind::Nul) }
+            i += 1
+        }
+        let old = self.bytes.len()
+        if !self.bytes.try_resize(old + length) { return Result::Err(Kind::Allocation) }
+        self.bytes.copy_from(dest: old, source: input, offset: start, len: length)
+        self.ends[self.count as usize] = old + length
+        self.count += 1
+        Result::Ok(())
+    }
+    pub fn field_start(self, _ index: u64) -> u64 {
+        core::assert(index < self.count)
+        if index == 0 { 0 } else { self.ends[(index - 1) as usize] }
+    }
+    pub fn field_len(self, _ index: u64) -> u64 {
+        self.ends[index as usize] - self.field_start(index)
+    }
+    pub fn byte_at(self, _ index: u64, _ pos: u64) -> u8 {
+        core::assert(pos < self.field_len(index))
+        self.bytes.byte_at(self.field_start(index) + pos)
+    }
+    pub fn release(own self) { self.bytes.release() }
+}
+pub trait RecordSink {
+    fn accept(mut self, _ record: Record, _ offset: u64, _ row: u64) -> Result<Failure, ()>
+}
+pub trait ByteSink {
+    fn put(mut self, _ byte: u8) -> Result<Kind, ()>
+}
+enum State { Start, Bare, Quoted, Closed, Cr }
+pub struct Parser {
+    record: Record, limits: Limits, state: State, raw: u64, field_start: u64,
+    pos: u64, rows: u64, active: bool, done: bool, failed: bool, failure: Failure,
+}
+impl Parser {
+    pub fn new(_ limits: Limits) -> Self {
+        let invalid = limits.fields == 0 || limits.fields > 256 || limits.raw_bytes == 0
+            || limits.raw_bytes > 1048576 || limits.field_bytes == 0 || limits.field_bytes > limits.raw_bytes
+        Self {
+            record: Record { bytes: ByteBuffer::new(), ends: [0; 256], count: 0 },
+            limits, state: State::Start, raw: 0, field_start: 0, pos: 0, rows: 0,
+            active: false, done: false, failed: invalid,
+            failure: Failure { kind: Kind::Config, offset: 0, row: 0, field: 0 },
+        }
+    }
+    pub fn record_capacity(self) -> u64 { self.record.bytes.capacity() }
+    pub fn records_seen(self) -> u64 { self.rows }
+    pub fn position(self) -> u64 { self.pos }
+    pub fn release(own self) { self.record.release() }
+    fn fail(mut self, _ kind: Kind, _ field: u64) -> Result<Failure, ()> {
+        if !self.failed {
+            self.failed = true
+            self.failure = Failure { kind, offset: self.pos, row: self.rows, field }
+        }
+        Result::Err(self.failure)
+    }
+    fn append(mut self, _ byte: u8) -> Result<Failure, ()> {
+        let length = self.record.bytes.len()
+        if length - self.field_start >= self.limits.field_bytes { return self.fail(Kind::FieldLimit, self.record.count) }
+        if !self.record.bytes.try_resize(length + 1) { return self.fail(Kind::Allocation, self.record.count) }
+        self.record.bytes.set_byte(index: length, value: byte)
+        Result::Ok(())
+    }
+    fn end_field(mut self) {
+        self.record.ends[self.record.count as usize] = self.record.bytes.len()
+        self.record.count += 1
+        self.field_start = self.record.bytes.len()
+    }
+    fn deliver(mut self) -> Result<Failure, ()> uses (records: mut RecordSink) {
+        self.end_field()
+        if self.rows == 0xffffffffffffffff { return self.fail(Kind::Overflow, self.record.count - 1) }
+        match records.accept(self.record, self.pos, self.rows) {
+            Result::Err(error) => {
+                self.failed = true
+                self.failure = error
+                return Result::Err(error)
+            },
+            Result::Ok(()) => {},
+        }
+        self.rows += 1
+        self.record.bytes.clear()
+        self.record.count = 0
+        self.field_start = 0
+        self.raw = 0
+        self.active = false
+        self.state = State::Start
+        Result::Ok(())
+    }
+    fn consume(mut self, _ byte: u8) -> Result<Failure, ()> uses (records: mut RecordSink) {
+        // Diagnose syntax before resource limits. CRLF terminators do not use the raw budget.
+        if byte == 0 { return self.fail(Kind::Nul, self.record.count) }
+        match self.state {
+            State::Cr => {
+                if byte != 10 { return self.fail(Kind::BareCr, self.record.count) }
+                return self.deliver()
+            },
+            State::Quoted => {},
+            _ => {
+                if byte == 10 { return self.fail(Kind::BareLf, self.record.count) }
+                if byte == 13 { self.state = State::Cr
+self.active = true
+return Result::Ok(()) }
+            },
+        }
+        match self.state {
+            State::Bare => { if byte == 34 { return self.fail(Kind::Quote, self.record.count) } },
+            State::Closed => { if byte != 34 && byte != 44 { return self.fail(Kind::AfterQuote, self.record.count) } },
+            _ => {},
+        }
+        if self.raw >= self.limits.raw_bytes { return self.fail(Kind::RawLimit, self.record.count) }
+        self.raw += 1
+        self.active = true
+        match self.state {
+            State::Quoted => {
+                if byte == 34 { self.state = State::Closed
+Result::Ok(()) } else { self.append(byte) }
+            },
+            State::Closed => {
+                if byte == 34 { self.state = State::Quoted
+self.append(byte) } else { self.separator() }
+            },
+            State::Start => {
+                if byte == 34 { self.state = State::Quoted
+Result::Ok(()) }
+                else if byte == 44 { self.separator() }
+                else { self.state = State::Bare
+self.append(byte) }
+            },
+            State::Bare => { if byte == 44 { self.separator() } else { self.append(byte) } },
+            State::Cr => core::panic(),
+        }
+    }
+    fn separator(mut self) -> Result<Failure, ()> {
+        if self.record.count + 1 >= self.limits.fields { return self.fail(Kind::FieldCount, self.record.count + 1) }
+        self.end_field()
+        self.state = State::Start
+        Result::Ok(())
+    }
+    pub fn feed(mut self, _ input: ByteBuffer, _ start: u64, _ length: u64) -> Result<Failure, ()>
+        uses (records: mut RecordSink)
+    {
+        if self.failed { return Result::Err(self.failure) }
+        if self.done { return self.fail(Kind::Finished, self.record.count) }
+        if start > input.len() || length > input.len() - start { return self.fail(Kind::Range, self.record.count) }
+        var i: u64 = 0
+        while i < length {
+            if self.pos == 0xffffffffffffffff { return self.fail(Kind::Overflow, self.record.count) }
+            match self.consume(input.byte_at(start + i)) {
+                Result::Err(error) => return Result::Err(error),
+                Result::Ok(()) => {},
+            }
+            self.pos += 1
+            i += 1
+        }
+        Result::Ok(())
+    }
+    pub fn finish(mut self) -> Result<Failure, ()> uses (records: mut RecordSink) {
+        if self.failed { return Result::Err(self.failure) }
+        if self.done { return Result::Ok(()) }
+        match self.state {
+            State::Quoted => return self.fail(Kind::Unclosed, self.record.count),
+            State::Cr => return self.fail(Kind::BareCr, self.record.count),
+            _ => {},
+        }
+        if self.active {
+            match self.deliver() { Result::Err(error) => return Result::Err(error), Result::Ok(()) => {} }
+        }
+        self.done = true
+        Result::Ok(())
+    }
+}
+
+fn emit(_ byte: u8, _ offset: u64, _ row: u64, _ field: u64) -> Result<Failure, ()>
+    uses (output: mut ByteSink)
+{
+    match output.put(byte) {
+        Result::Ok(()) => Result::Ok(()),
+        Result::Err(kind) => Result::Err(Failure { kind, offset, row, field }),
+    }
+}
+pub fn write_selected(_ record: Record, _ columns: [u64; 256], _ count: u64, _ offset: u64, _ row: u64) -> Result<Failure, ()>
+    uses (output: mut ByteSink)
+{
+    if count == 0 || record.count == 0 { return Result::Err(Failure { kind: Kind::EmptyRecord, offset, row, field: 0 }) }
+    if count > 256 || record.count > 256 { return Result::Err(Failure { kind: Kind::FieldCount, offset, row, field: count }) }
+    // Validate all selected fields before emitting any of this record.
+    var k: u64 = 0
+    while k < count {
+        let index = columns[k as usize]
+        if index >= record.count { return Result::Err(Failure { kind: Kind::Missing, offset, row, field: index }) }
+        var p: u64 = 0
+        while p < record.field_len(index) {
+            if record.byte_at(index, p) == 0 { return Result::Err(Failure { kind: Kind::Nul, offset, row, field: index }) }
+            p += 1
+        }
+        k += 1
+    }
+    k = 0
+    while k < count {
+        let index = columns[k as usize]
+        if k > 0 { match emit(44, offset, row, index) { Result::Err(e) => return Result::Err(e), _ => {} } }
+        match emit(34, offset, row, index) { Result::Err(e) => return Result::Err(e), _ => {} }
+        var p: u64 = 0
+        while p < record.field_len(index) {
+            let byte = record.byte_at(index, p)
+            match emit(byte, offset, row, index) { Result::Err(e) => return Result::Err(e), _ => {} }
+            if byte == 34 { match emit(34, offset, row, index) { Result::Err(e) => return Result::Err(e), _ => {} } }
+            p += 1
+        }
+        match emit(34, offset, row, index) { Result::Err(e) => return Result::Err(e), _ => {} }
+        k += 1
+    }
+    match emit(13, offset, row, 0) { Result::Err(e) => return Result::Err(e), _ => {} }
+    emit(10, offset, row, 0)
+}
+pub fn write_record(_ record: Record, _ offset: u64, _ row: u64) -> Result<Failure, ()>
+    uses (output: mut ByteSink)
+{
+    var columns: [u64; 256] = [0; 256]
+    var i: u64 = 0
+    while i < 256 { columns[i as usize] = i
+i += 1 }
+    write_selected(record, columns, record.count, offset, row)
+}
+
+// Encoded raw size excludes the final CRLF, exactly as Parser's raw budget does.
+pub fn canonical_raw_size(_ record: Record, _ columns: [u64; 256], _ count: u64, _ offset: u64, _ row: u64) -> Result<Failure, u64> {
+    if count == 0 || record.count == 0 { return Result::Err(Failure { kind: Kind::EmptyRecord, offset, row, field: 0 }) }
+    if count > 256 { return Result::Err(Failure { kind: Kind::FieldCount, offset, row, field: count }) }
+    var size: u64 = count - 1
+    var k: u64 = 0
+    while k < count {
+        let index = columns[k as usize]
+        if index >= record.count { return Result::Err(Failure { kind: Kind::Missing, offset, row, field: index }) }
+        size += 2 + record.field_len(index)
+        var p: u64 = 0
+        while p < record.field_len(index) {
+            if record.byte_at(index, p) == 34 { size += 1 }
+            p += 1
+        }
+        k += 1
+    }
+    // At most 256 selections of <=1MiB decoded bytes, each at most doubled.
+    Result::Ok(size)
+}
+
+pub fn write_selected_bounded(_ record: Record, _ columns: [u64; 256], _ count: u64, _ limits: Limits, _ offset: u64, _ row: u64) -> Result<Failure, ()>
+    uses (output: mut ByteSink)
+{
+    if limits.fields == 0 || limits.fields > 256 || limits.raw_bytes == 0
+        || limits.raw_bytes > 1048576 || limits.field_bytes == 0 || limits.field_bytes > limits.raw_bytes {
+        return Result::Err(Failure { kind: Kind::Config, offset, row, field: 0 })
+    }
+    let size = match canonical_raw_size(record, columns, count, offset, row) {
+        Result::Ok(value) => value,
+        Result::Err(error) => return Result::Err(error),
+    }
+    if count > limits.fields { return Result::Err(Failure { kind: Kind::FieldCount, offset, row, field: count }) }
+    var k: u64 = 0
+    while k < count {
+        let index = columns[k as usize]
+        if record.field_len(index) > limits.field_bytes {
+            return Result::Err(Failure { kind: Kind::FieldLimit, offset, row, field: index })
+        }
+        k += 1
+    }
+    if size > limits.raw_bytes { return Result::Err(Failure { kind: Kind::RawLimit, offset, row, field: 0 }) }
+    write_selected(record, columns, count, offset, row)
+}
+
+pub fn write_record_bounded(_ record: Record, _ limits: Limits, _ offset: u64, _ row: u64) -> Result<Failure, ()>
+    uses (output: mut ByteSink)
+{
+    var columns: [u64; 256] = [0; 256]
+    var i: u64 = 0
+    while i < 256 { columns[i as usize] = i
+        i += 1 }
+    write_selected_bounded(record, columns, record.count, limits, offset, row)
+}

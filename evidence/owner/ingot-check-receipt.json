@@ -1,0 +1,11 @@
+{
+  "utc": "2026-11-06T08:28:11Z",
+  "argv": [
+    "<external-fe-26.5.0>",
+    "check",
+    "."
+  ],
+  "returncode": 0,
+  "library_sha256": "fef132f1106a8a6ff53cb047d5bf5dcf7e50321e9b1071e4770483d9f330c5e7",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0"
+}

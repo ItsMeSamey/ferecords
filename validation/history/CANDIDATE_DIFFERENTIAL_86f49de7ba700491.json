@@ -1,0 +1,710 @@
+{
+  "scope": "independent native parser/corpus fixed-chunk differential",
+  "binary_source": "historical-workspace/fe-builders-2026/ferecords/build/bin/ferecords",
+  "binary_snapshot": "historical-workspace/fe-builders-2026/independent-review/candidate-86f49de7ba700491",
+  "binary_sha256": "86f49de7ba7004914b1e3106307bd560c78012c6e33c94476ea370b402b9c45b",
+  "corpus_sha256": "85da8df5c9a1fe48f61581991fa0753d7b5e00302a099864a41458fd6b7cb08a",
+  "cases": 1611,
+  "executions": 8055,
+  "chunks": [
+    1,
+    2,
+    3,
+    7,
+    4096
+  ],
+  "elapsed_seconds": 7.5359386909985915,
+  "result": "FAIL",
+  "failures": [
+    {
+      "case": "hand-invalid-zero-field",
+      "input_hex": "",
+      "limits": [
+        0,
+        8,
+        4
+      ],
+      "chunk": 1,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-field",
+      "input_hex": "",
+      "limits": [
+        0,
+        8,
+        4
+      ],
+      "chunk": 2,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-field",
+      "input_hex": "",
+      "limits": [
+        0,
+        8,
+        4
+      ],
+      "chunk": 3,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-field",
+      "input_hex": "",
+      "limits": [
+        0,
+        8,
+        4
+      ],
+      "chunk": 7,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-field",
+      "input_hex": "",
+      "limits": [
+        0,
+        8,
+        4
+      ],
+      "chunk": 4096,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-raw",
+      "input_hex": "",
+      "limits": [
+        1,
+        0,
+        4
+      ],
+      "chunk": 1,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-raw",
+      "input_hex": "",
+      "limits": [
+        1,
+        0,
+        4
+      ],
+      "chunk": 2,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-raw",
+      "input_hex": "",
+      "limits": [
+        1,
+        0,
+        4
+      ],
+      "chunk": 3,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-raw",
+      "input_hex": "",
+      "limits": [
+        1,
+        0,
+        4
+      ],
+      "chunk": 7,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-raw",
+      "input_hex": "",
+      "limits": [
+        1,
+        0,
+        4
+      ],
+      "chunk": 4096,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-count",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        0
+      ],
+      "chunk": 1,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-count",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        0
+      ],
+      "chunk": 2,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-count",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        0
+      ],
+      "chunk": 3,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-count",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        0
+      ],
+      "chunk": 7,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-zero-count",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        0
+      ],
+      "chunk": 4096,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-field-over-raw",
+      "input_hex": "",
+      "limits": [
+        9,
+        8,
+        4
+      ],
+      "chunk": 1,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-field-over-raw",
+      "input_hex": "",
+      "limits": [
+        9,
+        8,
+        4
+      ],
+      "chunk": 2,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-field-over-raw",
+      "input_hex": "",
+      "limits": [
+        9,
+        8,
+        4
+      ],
+      "chunk": 3,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-field-over-raw",
+      "input_hex": "",
+      "limits": [
+        9,
+        8,
+        4
+      ],
+      "chunk": 7,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-field-over-raw",
+      "input_hex": "",
+      "limits": [
+        9,
+        8,
+        4
+      ],
+      "chunk": 4096,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-count-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        257
+      ],
+      "chunk": 1,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-count-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        257
+      ],
+      "chunk": 2,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-count-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        257
+      ],
+      "chunk": 3,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-count-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        257
+      ],
+      "chunk": 7,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-count-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        8,
+        257
+      ],
+      "chunk": 4096,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-raw-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        1048577,
+        1
+      ],
+      "chunk": 1,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-raw-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        1048577,
+        1
+      ],
+      "chunk": 2,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-raw-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        1048577,
+        1
+      ],
+      "chunk": 3,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-raw-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        1048577,
+        1
+      ],
+      "chunk": 7,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "case": "hand-invalid-raw-cap",
+      "input_hex": "",
+      "limits": [
+        1,
+        1048577,
+        1
+      ],
+      "chunk": 4096,
+      "expected_rows": [],
+      "expected_error": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "actual_rows": [],
+      "actual_error": null,
+      "stats": null,
+      "exit": 64,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    }
+  ]
+}

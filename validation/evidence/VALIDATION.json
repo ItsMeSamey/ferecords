@@ -1,0 +1,46 @@
+{
+  "result": "PASS",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0",
+  "stages": [
+    {
+      "name": "build-current-source",
+      "wall_seconds": 3.3943126410013065
+    },
+    {
+      "name": "reference",
+      "wall_seconds": 0.031178722041659057
+    },
+    {
+      "name": "parser-corpus",
+      "wall_seconds": 6.916437891020905
+    },
+    {
+      "name": "native-partitions",
+      "wall_seconds": 5.237890870019328
+    },
+    {
+      "name": "bounded-writer",
+      "wall_seconds": 4.106946023006458
+    },
+    {
+      "name": "extended-cli",
+      "wall_seconds": 0.9211778569733724
+    },
+    {
+      "name": "host-io",
+      "wall_seconds": 0.014219920965842903
+    }
+  ],
+  "core_sha256": "8713bca3eedb4925f7689abdd177552049e83d753c34010bee03c9b8c5fc719a",
+  "cli_sha256": "0eaeb4f23f2debac0d2b4f1b9ca7b54d1ec7d8ad8d56dea6d4d23840b1a06c81",
+  "binary_sha256": "27146ff3e1ca3a3e6da4d6d7d5b4e19f7ea3132a9e608f8bfad711e0d41e4212",
+  "receipts": {
+    "BOUNDED_WRITER_8af650fad0ddaf4a.json": "a72087ca63a6a11aa90cf949455645a9aa825c2a11772cc3c66d799980d3c909",
+    "CANDIDATE_DIFFERENTIAL_27146ff3e1ca3a3e.json": "bb8e7a76ff48320de6d5101c006402ea93be7c406a44eb0a5ce49d406c184c42",
+    "EXTENDED_CLI_27146ff3e1ca3a3e.json": "c229b0c26704fbc9cb8ed1cfc63616dc343beae0bc4397691915b2e45f6eac20",
+    "HOST_IO.json": "265beb305cccbf47cbce490d4024e2c270789896b32205b684ec18ca007163b2",
+    "NATIVE_CONFORMANCE_02547bac55e9e933.json": "d85727ef2dc1261325c411dcfd5f0acbfb0cbfb8878f24d560a31fd7732abdd2",
+    "REFERENCE.json": "23d7073549a0619a1fb42155b0ce9c4b15a5da52722309ad9efa89c8f48b065b"
+  },
+  "wall_seconds": 20.632358490023762
+}

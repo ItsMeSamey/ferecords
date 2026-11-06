@@ -1,0 +1,15 @@
+PASS  [0.0074s] splits_preserve_complete_records_and_bytes
+PASS  [0.0054s] all_partitions_of_short_quoted_record
+PASS  [0.0082s] syntax_errors_and_positions_survive_every_split
+PASS  [0.0082s] limits_are_exact_and_syntax_precedes_limits
+PASS  [0.0074s] checked_range_configuration_and_terminal_calls
+PASS  [0.0059s] consumer_failure_is_sticky
+PASS  [0.0067s] writer_has_independent_canonical_bytes_and_propagates_failure
+PASS  [0.0169s] writer_rejects_empty_and_missing_before_output
+PASS  [0.0071s] record_builder_rejects_nul_and_range_without_mutating
+PASS  [0.0089s] writer_roundtrip_and_ordered_duplicate_projection
+PASS  [0.0073s] fixed_field_metadata_boundary_and_builder_atomicity
+PASS  [0.0166s] counter_overflow_guards_with_injected_boundary_state
+PASS  [0.0068s] bounded_writer_counts_quote_expansion_and_preflights_every_limit
+
+test result: ok. 13 passed; 0 failed

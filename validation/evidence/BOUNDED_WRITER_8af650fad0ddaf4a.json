@@ -1,0 +1,24 @@
+{
+  "scope": "independent canonical output preflight and reparsing at exact/over 1MiB budget",
+  "core_sha256": "8713bca3eedb4925f7689abdd177552049e83d753c34010bee03c9b8c5fc719a",
+  "checks_sha256": "a19f07d6f77277d102e1c8059abf8873ac84c1a41b300a4841ff3b8538fd6d83",
+  "generated_sha256": "8af650fad0ddaf4a725a674286bd74083f0a6ecae39810466045347231df8e00",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0",
+  "command": [
+    "external/fe-v26.5.0-linux-amd64",
+    "test",
+    "package/build/validation-runs/1793955049295038342/bounded-frozen-8af650fad0ddaf4a.fe",
+    "--backend",
+    "native",
+    "--jobs",
+    "1",
+    "--native-timeout-secs",
+    "20",
+    "--native-output-limit-kib",
+    "64"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 3.7936943150125444,
+  "log": "package/build/validation-runs/1793955049295038342/bounded-8af650fad0ddaf4a.log",
+  "result": "PASS"
+}

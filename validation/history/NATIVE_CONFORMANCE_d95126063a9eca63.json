@@ -1,0 +1,27 @@
+{
+  "scope": "independent frozen hand cases, all short partitions, long single splits, empty chunks, terminal behavior",
+  "core_source": "historical-workspace/fe-builders-2026/ferecords/src/lib.fe",
+  "core_sha256": "ef10fb8de622ed51e3003586d080ee405472553308fa51d3c059e3552f8b89fd",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0",
+  "generated_source_sha256": "d95126063a9eca6385fa062c47c1fb686d6fddbc90e1b795cdaff14c94dc8529",
+  "hand_fixture_sha256": "e2abebaf7a79a1567226e73aaacd738d107c10feab0c0158178709cac9908b5f",
+  "hand_cases": 56,
+  "partition_schedules": 377,
+  "command": [
+    "historical-workspace/fe-builders-2026-preparation/toolchain/fe-v26.5.0-linux-amd64",
+    "test",
+    "historical-workspace/fe-builders-2026/independent-review/native-frozen-d95126063a9eca63.fe",
+    "--backend",
+    "native",
+    "--jobs",
+    "1",
+    "--native-timeout-secs",
+    "20",
+    "--native-output-limit-kib",
+    "64"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 10.301739094022196,
+  "result": "PASS",
+  "log": "historical-workspace/fe-builders-2026/independent-review/native-d95126063a9eca63.log"
+}

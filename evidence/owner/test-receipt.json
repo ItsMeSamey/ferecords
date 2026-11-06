@@ -1,0 +1,21 @@
+{
+  "action": "test",
+  "compiler_sha256": "3732fbe8a6e9d2ea3925d02d0e3a1478bc1e01d742c2be75d3ea7300c46c45f0",
+  "argv": [
+    "<external-fe-26.5.0>",
+    "test",
+    "./build/native-tests.fe",
+    "--backend",
+    "native",
+    "--jobs",
+    "1",
+    "--native-timeout-secs",
+    "20",
+    "--native-output-limit-kib",
+    "64"
+  ],
+  "source_sha256": "3a296295298ca2caaf31adf52e1d94f8a905c9bdfe7eed55ce39ed5da546f77e",
+  "returncode": 0,
+  "wall_seconds": 5.505979825044051,
+  "utc": "2026-11-06T08:24:26Z"
+}

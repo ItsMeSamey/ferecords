@@ -1,0 +1,108 @@
+{
+  "scope": "Linux x86_64 ordinary owned-stream error behavior, no durability or host-OOM proof",
+  "binary_sha256": "27146ff3e1ca3a3e6da4d6d7d5b4e19f7ea3132a9e608f8bfad711e0d41e4212",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "clean-empty-input",
+      "exit": 0,
+      "accepted_exit_codes": [
+        0
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "name": "clean-pipe-projection",
+      "exit": 0,
+      "accepted_exit_codes": [
+        0
+      ],
+      "stdout_bytes": 17,
+      "stdout_sha256": "13cbf14d2a71c4df689955ee593798e4e22788c809997bcc58654fc5573b9f87",
+      "pass": true
+    },
+    {
+      "name": "directory-read-error-validate",
+      "exit": 20,
+      "accepted_exit_codes": [
+        20
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "name": "directory-read-error-select",
+      "exit": 20,
+      "accepted_exit_codes": [
+        20
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "name": "read-error-after-complete-prefix-no-finish",
+      "exit": 20,
+      "accepted_exit_codes": [
+        20
+      ],
+      "stdout_bytes": 7500,
+      "stdout_sha256": "5592884af4290a8cdda5643ce4d376001b94b630c4f3278ac46b04f5774e997f",
+      "pass": true
+    },
+    {
+      "name": "deferred-output-failure",
+      "exit": 16,
+      "accepted_exit_codes": [
+        16
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "name": "help-flush-failure",
+      "exit": 16,
+      "accepted_exit_codes": [
+        16
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "name": "syntax-error-precedes-final-flush-failure",
+      "exit": 10,
+      "accepted_exit_codes": [
+        10
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "name": "missing-column-precedes-final-flush-failure",
+      "exit": 18,
+      "accepted_exit_codes": [
+        18
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    },
+    {
+      "name": "downstream-pipe-closed",
+      "exit": -13,
+      "accepted_exit_codes": [
+        16,
+        -13
+      ],
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pass": true
+    }
+  ]
+}

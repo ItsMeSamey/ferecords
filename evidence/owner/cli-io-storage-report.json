@@ -1,0 +1,48 @@
+{
+  "utc": "2026-11-06T08:48:58.948669+00:00",
+  "test_sha256": "e17914fd20054cef3c0ae4dc4ae35fce2ba64d0cc366f54bfa8c6a5241fa3b01",
+  "binary_sha256": "27146ff3e1ca3a3e6da4d6d7d5b4e19f7ea3132a9e608f8bfad711e0d41e4212",
+  "record_hex": "612c22622c0d0a2222222cff0d0a",
+  "expected_inspect_row": "R 3 61 622c0d0a22 ff",
+  "checks": [
+    {
+      "argv": [
+        "./build/bin/ferecords",
+        "inspect",
+        "4096"
+      ],
+      "record_count": 1000,
+      "input_bytes": 14000,
+      "input_sha256": "4fff53eb9b7febd8b60371041f1bc887c7ccce5f12733380a89dab6c3c06bbcf",
+      "inspect_output_sha256": "c41476cf161e02b7e714e75a0f98e95b4cccce01081459fa0e04e2ac0d204e71",
+      "record_buffer_capacity_bytes": 32,
+      "field_offsets_logical_bytes": 2048,
+      "input_buffer_capacity_bytes": 4096,
+      "sampled_process_rss_bytes": null,
+      "last_observed_process_high_water_bytes": null,
+      "wall_seconds_descriptive_only": 0.0027296560001559556,
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "./build/bin/ferecords",
+        "inspect",
+        "4096"
+      ],
+      "record_count": 100000,
+      "input_bytes": 1400000,
+      "input_sha256": "58f8e8947ebfc315676ea5fe3570603bbd744da79d486787c2489e1b3875b37e",
+      "inspect_output_sha256": "6a23ad3c5b063a8b0334c20e8c093fc41b12047e8ab3ef03e23263dd93f7c4fb",
+      "record_buffer_capacity_bytes": 32,
+      "field_offsets_logical_bytes": 2048,
+      "input_buffer_capacity_bytes": 4096,
+      "sampled_process_rss_bytes": 2125824,
+      "last_observed_process_high_water_bytes": 2125824,
+      "wall_seconds_descriptive_only": 0.1279308709781617,
+      "returncode": 0
+    }
+  ],
+  "scope": "Both fixed corpora must expose the same record and input buffer capacities. Field offsets are 256 logical u64 entries. No past rows are retained by this test driver or the parser.",
+  "limitations": "Capacities and logical metadata exclude fixed scalar state, stack/ABI layout, CLI column arrays, libc buffers and allocator overhead. RSS samples are descriptive, may miss peaks, and are not the constant-storage proof. Wall times are not a speed comparison.",
+  "passed": true
+}
